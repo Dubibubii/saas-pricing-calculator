@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Pricing Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+        }
+        .slider-thumb::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .pricing-card {
+            transition: all 0.3s ease;
+        }
+        .pricing-card:hover {
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <i data-lucide="calculator" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h1 class="text-xl font-bold gradient-text">SaaS Pricing Calculator</h1>
+                </div>
+                <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Inputs -->
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                        <i data-lucide="sliders-horizontal" class="w-5 h-5 text-blue-500"></i>
+                        Input Parameters
+                    </h2>
+
+                    <!-- Cost per User -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Cost per User (Monthly)</label>
+                            <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">$<span id="costValue">5</span></span>
+                        </div>
+                        <input type="range" id="costPerUser" min="1" max="50" value="5" step="0.5"
+                            class="slider-thumb w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Your infrastructure & support costs per user</p>
+                    </div>
+
+                    <!-- Target Margin -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Target Margin</label>
+                            <span class="text-sm font-semibold text-blue-600 dark:text-blue-400"><span id="marginValue">70</span>%</span>
+                        </div>
+                        <input type="range" id="targetMargin" min="30" max="95" value="70" step="5"
+                            class="slider-thumb w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Desired profit margin after costs</p>
+                    </div>
+
+                    <!-- Competitor Low -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Competitor Low Price</label>
+                            <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">$<span id="compLowValue">10</span></span>
+                        </div>
+                        <input type="range" id="compLow" min="5" max="100" value="10" step="1"
+                            class="slider-thumb w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lowest competitor pricing tier</p>
+                    </div>
+
+                    <!-- Competitor High -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Competitor High Price</label>
+                            <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">$<span id="compHighValue">99</span></span>
+                        </div>
+                        <input type="range" id="compHigh" min="50" max="500" value="99" step="5"
+                            class="slider-thumb w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Highest competitor pricing tier</p>
+                    </div>
+
+                    <!-- Market Position -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Market Position</label>
+                            <span class="text-sm font-semibold text-blue-600 dark:text-blue-400" id="positionLabel">Premium</span>
+                        </div>
+                        <input type="range" id="marketPosition" min="0" max="2" value="1" step="1"
+                            class="slider-thumb w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <span>Budget</span>
+                            <span>Market Rate</span>
+                            <span>Premium</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature Multiplier -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Feature Multiplier</label>
+                            <span class="text-sm font-semibold text-blue-600 dark:text-blue-400"><span id="featureValue">2.5</span>x</span>
+                        </div>
+                        <input type="range" id="featureMultiplier" min="1.5" max="5" value="2.5" step="0.1"
+                            class="slider-thumb w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Price jump between tiers (Pro vs Basic)</p>
+                    </div>
+                </div>
+
+                <!-- Calculated Metrics -->
+                <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-5 h-5"></i>
+                        Calculated Metrics
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <p class="text-sm text-blue-100">Break-even Price</p>
+                            <p class="text-2xl font-bold">$<span id="breakEvenPrice">17</span></p>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <p class="text-sm text-blue-100">Avg Revenue/User</p>
+                            <p class="text-2xl font-bold">$<span id="avgRevenue">42</span></p>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <p class="text-sm text-blue-100">Est. Profit Margin</p>
+                            <p class="text-2xl font-bold"><span id="estMargin">76</span>%</p>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <p class="text-sm text-blue-100">Price Position</p>
+                            <p class="text-2xl font-bold" id="pricePositionLabel">Mid</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Pricing Preview -->
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold flex items-center gap-2">
+                            <i data-lucide="layout" class="w-5 h-5 text-purple-500"></i>
+                            Pricing Page Preview
+                        </h2>
+                        <span class="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">Live</span>
+                    </div>
+
+                    <!-- Pricing Cards Preview -->
+                    <div id="pricingPreview" class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
+                        <div class="text-center mb-8">
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Simple, Transparent Pricing</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Choose the plan that fits your needs</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Basic Tier -->
+                            <div class="pricing-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                                <div class="text-center">
+                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Basic</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">For individuals</p>
+                                    <div class="mb-4">
+                                        <span class="text-4xl font-bold text-gray-900 dark:text-white">$<span id="basicPrice">19</span></span>
+                                        <span class="text-gray-500 dark:text-gray-400">/mo</span>
+                                    </div>
+                                    <ul class="text-left space-y-2 mb-6 text-sm text-gray-600 dark:text-gray-400">
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Up to 5 users
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Basic analytics
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Email support
+                                        </li>
+                                    </ul>
+                                    <button class="w-full py-2 px-4 rounded-lg border-2 border-blue-500 text-blue-500 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                                        Get Started
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Pro Tier (Popular) -->
+                            <div class="pricing-card bg-white dark:bg-gray-800 rounded-2xl border-2 border-blue-500 p-6 relative transform scale-105 shadow-lg">
+                                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                                    Most Popular
+                                </div>
+                                <div class="text-center">
+                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Pro</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">For growing teams</p>
+                                    <div class="mb-4">
+                                        <span class="text-4xl font-bold text-blue-600 dark:text-blue-400">$<span id="proPrice">49</span></span>
+                                        <span class="text-gray-500 dark:text-gray-400">/mo</span>
+                                    </div>
+                                    <ul class="text-left space-y-2 mb-6 text-sm text-gray-600 dark:text-gray-400">
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Unlimited users
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Advanced analytics
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Priority support
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Custom integrations
+                                        </li>
+                                    </ul>
+                                    <button class="w-full py-2 px-4 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors">
+                                        Start Free Trial
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Enterprise Tier -->
+                            <div class="pricing-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                                <div class="text-center">
+                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Enterprise</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">For large organizations</p>
+                                    <div class="mb-4">
+                                        <span class="text-4xl font-bold text-gray-900 dark:text-white">$<span id="enterprisePrice">149</span></span>
+                                        <span class="text-gray-500 dark:text-gray-400">/mo</span>
+                                    </div>
+                                    <ul class="text-left space-y-2 mb-6 text-sm text-gray-600 dark:text-gray-400">
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Everything in Pro
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            SLA guarantee
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Dedicated support
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                            Custom contracts
+                                        </li>
+                                    </ul>
+                                    <button class="w-full py-2 px-4 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                                        Contact Sales
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <i data-lucide="download" class="w-5 h-5 text-green-500"></i>
+                        Export Pricing
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button onclick="exportHTML()" class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">
+                            <i data-lucide="file-code" class="w-4 h-4"></i>
+                            <span class="text-sm font-medium">HTML</span>
+                        </button>
+                        <button onclick="exportMarkdown()" class="flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span class="text-sm font-medium">Markdown</span>
+                        </button>
+                        <button onclick="exportImage()" class="flex items-center justify-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors">
+                            <i data-lucide="image" class="w-4 h-4"></i>
+                            <span class="text-sm font-medium">Image</span>
+                        </button>
+                        <button onclick="copyToClipboard()" class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                            <span class="text-sm font-medium">Copy</span>
+                        </button>
+                    </div>
+                    <p id="exportStatus" class="text-sm text-green-600 dark:text-green-400 mt-3 text-center hidden">Copied to clipboard!</p>
+                </div>
+
+                <!-- Pricing Recommendation -->
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                        <i data-lucide="lightbulb" class="w-5 h-5"></i>
+                        Pricing Recommendation
+                    </h3>
+                    <p id="recommendation" class="text-amber-700 dark:text-amber-300 text-sm">
+                        Based on your inputs, your pricing is well-positioned in the market. Consider offering an annual discount to improve cash flow and reduce churn.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Hidden canvas for image export -->
+    <canvas id="exportCanvas" style="display: none;"></canvas>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM Elements
+        const inputs = {
+            costPerUser: document.getElementById('costPerUser'),
+            targetMargin: document.getElementById('targetMargin'),
+            compLow: document.getElementById('compLow'),
+            compHigh: document.getElementById('compHigh'),
+            marketPosition: document.getElementById('marketPosition'),
+            featureMultiplier: document.getElementById('featureMultiplier')
+        };
+
+        const displays = {
+            costValue: document.getElementById('costValue'),
+            marginValue: document.getElementById('marginValue'),
+            compLowValue: document.getElementById('compLowValue'),
+            compHighValue: document.getElementById('compHighValue'),
+            featureValue: document.getElementById('featureValue'),
+            positionLabel: document.getElementById('positionLabel')
+        };
+
+        const pricing = {
+            basic: document.getElementById('basicPrice'),
+            pro: document.getElementById('proPrice'),
+            enterprise: document.getElementById('enterprisePrice')
+        };
+
+        const metrics = {
+            breakEven: document.getElementById('breakEvenPrice'),
+            avgRevenue: document.getElementById('avgRevenue'),
+            estMargin: document.getElementById('estMargin'),
+            pricePosition: document.getElementById('pricePositionLabel')
+        };
+
+        // State
+        let state = {
+            costPerUser: 5,
+            targetMargin: 70,
+            compLow: 10,
+            compHigh: 99,
+            marketPosition: 1,
+            featureMultiplier: 2.5
+        };
+
+        // Market position labels
+        const positionLabels = ['Budget', 'Market Rate', 'Premium'];
+        const positionValues = ['Low', 'Mid', 'High'];
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        
+        function initTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        });
+
+        initTheme();
+
+        // Update functions
+        function updateState() {
+            state.costPerUser = parseFloat(inputs.costPerUser.value);
+            state.targetMargin = parseInt(inputs.targetMargin.value);
+            state.compLow = parseInt(inputs.compLow.value);
+            state.compHigh = parseInt(inputs.compHigh.value);
+            state.marketPosition = parseInt(inputs.marketPosition.value);
+            state.featureMultiplier = parseFloat(inputs.featureMultiplier.value);
+
+            // Update displays
+            displays.costValue.textContent = state.costPerUser;
+            displays.marginValue.textContent = state.targetMargin;
+            displays.compLowValue.textContent = state.compLow;
+            displays.compHighValue.textContent = state.compHigh;
+            displays.featureValue.textContent = state.featureMultiplier;
+            displays.positionLabel.textContent = positionLabels[state.marketPosition];
+
+            calculatePricing();
+        }
+
+        function calculatePricing() {
+            // Calculate base price based on cost and target margin
+            const breakEven = state.costPerUser / (1 - state.targetMargin / 100);
+            
+            // Adjust based on market position
+            let positionMultiplier;
+            switch(state.marketPosition) {
+                case 0: positionMultiplier = 0.85; break; // Budget
+                case 1: positionMultiplier = 1.0; break;  // Market Rate
+                case 2: positionMultiplier = 1.25; break; // Premium
+                default: positionMultiplier = 1.0;
+            }
+
+            // Calculate competitor-based reference
+            const compMid = (state.compLow + state.compHigh) / 2;
+            
+            // Final base price (blend of cost-based and market-based)
+            const costBasedPrice = breakEven * positionMultiplier;
+            const marketBasedPrice = compMid * positionMultiplier;
+            const basePrice = (costBasedPrice + marketBasedPrice) / 2;
+
+            // Calculate tier prices
+            const basicPrice = Math.max(Math.round(basePrice / 5) * 5, 9);
+            const proPrice = Math.round(basicPrice * state.featureMultiplier / 5) * 5;
+            const enterprisePrice = Math.round(proPrice * 2.5 / 5) * 5;
+
+            // Update pricing display
+            pricing.basic.textContent = basicPrice;
+            pricing.pro.textContent = proPrice;
+            pricing.enterprise.textContent = enterprisePrice;
+
+            // Update metrics
+            metrics.breakEven.textContent = Math.round(breakEven);
+            metrics.avgRevenue.textContent = Math.round((basicPrice + proPrice + enterprisePrice) / 3);
+            
+            // Calculate actual margin
+            const avgMargin = ((basicPrice - state.costPerUser) / basicPrice * 100 + 
+                              (proPrice - state.costPerUser) / proPrice * 100 + 
+                              (enterprisePrice - state.costPerUser) / enterprisePrice * 100) / 3;
+            metrics.estMargin.textContent = Math.round(avgMargin);
+            metrics.pricePosition.textContent = positionValues[state.marketPosition];
+
+            // Update recommendation
+            updateRecommendation(basicPrice, proPrice, enterprisePrice, breakEven);
+        }
+
+        function updateRecommendation(basic, pro, enterprise, breakEven) {
+            const rec = document.getElementById('recommendation');
+            let text = '';
+
+            if (basic < breakEven * 1.2) {
+                text = 'Your Basic tier is priced close to break-even. Consider raising prices or reducing costs to improve profitability.';
+            } else if (state.marketPosition === 2 && pro < state.compHigh) {
+                text = 'As a premium product, your Pro tier could be priced higher. Premium positioning often supports 20-30% higher prices.';
+            } else if (state.featureMultiplier < 2) {
+                text = 'Your feature multiplier is low. Consider increasing the value gap between tiers to drive upgrades to higher plans.';
+            } else {
+                text = 'Your pricing looks well-structured. Consider offering annual billing with 2 months free to improve cash flow and reduce churn.';
+            }
+
+            rec.textContent = text;
+        }
+
+        // Event listeners
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('input', updateState);
+        });
+
+        // Export functions
+        function exportHTML() {
+            const html = generatePricingHTML();
+            downloadFile(html, 'pricing.html', 'text/html');
+        }
+
+        function exportMarkdown() {
+            const md = generatePricingMarkdown();
+            downloadFile(md, 'pricing.md', 'text/markdown');
+        }
+
+        function generatePricingHTML() {
+            const basic = pricing.basic.textContent;
+            const pro = pricing.pro.textContent;
+            const enterprise = pricing.enterprise.textContent;
+
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pricing</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 40px; }
+        .card { border: 1px solid #e5e7eb; border-radius: 16px; padding: 32px; text-align: center; }
+        .card.popular { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
+        .badge { background: #3b82f6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .price { font-size: 48px; font-weight: bold; margin: 16px 0; }
+        .price span { font-size: 16px; color: #6b7280; }
+        ul { list-style: none; padding: 0; text-align: left; }
+        li { padding: 8px 0; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; margin-top: 16px; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-secondary { background: transparent; border: 2px solid #3b82f6; color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Simple, Transparent Pricing</h1>
+    <div class="pricing-grid">
+        <div class="card">
+            <h2>Basic</h2>
+            <p>For individuals</p>
+            <div class="price">$${basic}<span>/mo</span></div>
+            <ul>
+                <li>✓ Up to 5 users</li>
+                <li>✓ Basic analytics</li>
+                <li>✓ Email support</li>
+            </ul>
+            <button class="btn-secondary">Get Started</button>
+        </div>
+        <div class="card popular">
+            <span class="badge">Most Popular</span>
+            <h2>Pro</h2>
+            <p>For growing teams</p>
+            <div class="price">$${pro}<span>/mo</span></div>
+            <ul>
+                <li>✓ Unlimited users</li>
+                <li>✓ Advanced analytics</li>
+                <li>✓ Priority support</li>
+                <li>✓ Custom integrations</li>
+            </ul>
+            <button class="btn-primary">Start Free Trial</button>
+        </div>
+        <div class="card">
+            <h2>Enterprise</h2>
+            <p>For large organizations</p>
+            <div class="price">$${enterprise}<span>/mo</span></div>
+            <ul>
+                <li>✓ Everything in Pro</li>
+                <li>✓ SLA guarantee</li>
+                <li>✓ Dedicated support</li>
+                <li>✓ Custom contracts</li>
+            </ul>
+            <button class="btn-secondary">Contact Sales</button>
+        </div>
+    </div>
+</body>
+</html>`;
+        }
+
+        function generatePricingMarkdown() {
+            const basic = pricing.basic.textContent;
+            const pro = pricing.pro.textContent;
+            const enterprise = pricing.enterprise.textContent;
+
+            return `# Pricing
+
+## Simple, Transparent Pricing
+
+Choose the plan that fits your needs
+
+### Basic - $${basic}/mo
+For individuals
+
+- Up to 5 users
+- Basic analytics
+- Email support
+
+[Get Started]
+
+---
+
+### Pro - $${pro}/mo ⭐ Most Popular
+For growing teams
+
+- Unlimited users
+- Advanced analytics
+- Priority support
+- Custom integrations
+
+[Start Free Trial]
+
+---
+
+### Enterprise - $${enterprise}/mo
+For large organizations
+
+- Everything in Pro
+- SLA guarantee
+- Dedicated support
+- Custom contracts
+
+[Contact Sales]
+
+---
+
+*All prices in USD. Billed monthly.*
+`;
+        }
+
+        function exportImage() {
+            const preview = document.getElementById('pricingPreview');
+            const canvas = document.getElementById('exportCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size
+            canvas.width = 1200;
+            canvas.height = 600;
+
+            // White background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw title
+            ctx.fillStyle = '#111827';
+            ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Simple, Transparent Pricing', canvas.width / 2, 60);
+
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '18px system-ui, -apple-system, sans-serif';
+            ctx.fillText('Choose the plan that fits your needs', canvas.width / 2, 90);
+
+            // Draw cards
+            const cardWidth = 340;
+            const cardHeight = 400;
+            const gap = 30;
+            const startX = (canvas.width - (cardWidth * 3 + gap * 2)) / 2;
+            const startY = 130;
+
+            const tiers = [
+                { name: 'Basic', price: pricing.basic.textContent, subtitle: 'For individuals', color: '#9ca3af', features: ['Up to 5 users', 'Basic analytics', 'Email support'] },
+                { name: 'Pro', price: pricing.pro.textContent, subtitle: 'For growing teams', color: '#3b82f6', popular: true, features: ['Unlimited users', 'Advanced analytics', 'Priority support', 'Custom integrations'] },
+                { name: 'Enterprise', price: pricing.enterprise.textContent, subtitle: 'For large organizations', color: '#9ca3af', features: ['Everything in Pro', 'SLA guarantee', 'Dedicated support', 'Custom contracts'] }
+            ];
+
+            tiers.forEach((tier, i) => {
+                const x = startX + (cardWidth + gap) * i;
+                const y = startY;
+
+                // Card shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(x + 4, y + 4, cardWidth, cardHeight);
+
+                // Card background
+                ctx.fillStyle = tier.popular ? '#eff6ff' : '#f9fafb';
+                ctx.fillRect(x, y, cardWidth, cardHeight);
+
+                // Border
+                ctx.strokeStyle = tier.popular ? '#3b82f6' : '#e5e7eb';
+                ctx.lineWidth = tier.popular ? 3 : 1;
+                ctx.strokeRect(x, y, cardWidth, cardHeight);
+
+                // Popular badge
+                if (tier.popular) {
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.fillRect(x + cardWidth / 2 - 50, y - 12, 100, 24);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '12px system-ui, -apple-system, sans-serif';
+                    ctx.fillText('Most Popular', x + cardWidth / 2, y + 3);
+                }
+
+                // Tier name
+                ctx.fillStyle = '#111827';
+                ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+                ctx.fillText(tier.name, x + cardWidth / 2, y + 50);
+
+                // Subtitle
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '14px system-ui, -apple-system, sans-serif';
+                ctx.fillText(tier.subtitle, x + cardWidth / 2, y + 75);
+
+                // Price
+                ctx.fillStyle = tier.popular ? '#2563eb' : '#111827';
+                ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
+                ctx.fillText(`$${tier.price}`, x + cardWidth / 2, y + 135);
+
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '16px system-ui, -apple-system, sans-serif';
+                ctx.fillText('/mo', x + cardWidth / 2 + 50, y + 135);
+
+                // Features
+                ctx.textAlign = 'left';
+                tier.features.forEach((feature, fi) => {
+                    const fy = y + 180 + fi * 30;
+                    ctx.fillStyle = '#22c55e';
+                    ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
+                    ctx.fillText('✓', x + 40, fy);
+                    ctx.fillStyle = '#4b5563';
+                    ctx.font = '16px system-ui, -apple-system, sans-serif';
+                    ctx.fillText(feature, x + 60, fy);
+                });
+
+                // Button
+                const btnY = y + cardHeight - 60;
+                ctx.fillStyle = tier.popular ? '#3b82f6' : '#ffffff';
+                ctx.fillRect(x + 30, btnY, cardWidth - 60, 44);
+                if (!tier.popular) {
+                    ctx.strokeStyle = '#3b82f6';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x + 30, btnY, cardWidth - 60, 44);
+                }
+                ctx.fillStyle = tier.popular ? '#ffffff' : '#3b82f6';
+                ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(tier.popular ? 'Start Free Trial' : 'Get Started', x + cardWidth / 2, btnY + 28);
+            });
+
+            // Download
+            const link = document.createElement('a');
+            link.download = 'pricing.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function copyToClipboard() {
+            const md = generatePricingMarkdown();
+            navigator.clipboard.writeText(md).then(() => {
+                const status = document.getElementById('exportStatus');
+                status.classList.remove('hidden');
+                setTimeout(() => status.classList.add('hidden'), 2000);
+            });
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initial calculation
+        updateState();
+    </script>
+</body>
+</html>
